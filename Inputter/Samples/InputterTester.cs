@@ -9,7 +9,7 @@ namespace Inputter.Samples
 {
 #if UNITY_EDITOR
     [CustomEditor(typeof(InputterTester))]
-    public class InputterTesterEditor : Editor
+    public class InputterTesterEditor : UnityEditor.Editor
     {
         public override bool RequiresConstantRepaint() => true;
 

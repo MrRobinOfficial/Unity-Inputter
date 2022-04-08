@@ -1,7 +1,4 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using UnityEngine.InputSystem.Layouts;
+﻿using UnityEngine.InputSystem.Layouts;
 using UnityEngine.InputSystem.Controls;
 using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.InputSystem.Utilities;
@@ -9,6 +6,11 @@ using UnityEngine.InputSystem;
 using UnityEngine.Scripting;
 using UnityEngine.Events;
 using UnityEngine;
+using System.Threading.Tasks;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Inputter
 {
@@ -72,25 +74,37 @@ namespace Inputter
         [InputControl(name = "steerAxis", displayName = "Steering", layout = "Axis", parameters = "normalize,normalizeMin=-1,normalizeMax=1,normalizeZero=0,clamp,clampMin=-1,clampMax=1")]
         public short steering;
 
-        [InputControl(name = "throttleAxis", displayName = "Throttle", layout = "Axis", parameters = "normalize,normalizeMin=1,normalizeMax=-1,normalizeZero=0")]
+        [InputControl(name = "throttleAxis", displayName = "Throttle", layout = "Button", format = "SHRT", parameters = "normalize,normalizeMin=1,normalizeMax=-1,normalizeZero=0")]
         public short throttle;
 
-        [InputControl(name = "brakeAxis", displayName = "Brake", layout = "Axis", parameters = "normalize,normalizeMin=1,normalizeMax=-1,normalizeZero=0")]
+        [InputControl(name = "brakeAxis", displayName = "Brake", layout = "Button", parameters = "normalize,normalizeMin=1,normalizeMax=-1,normalizeZero=0")]
         public short brake;
 
-        [InputControl(name = "clutchAxis", displayName = "Clutch", layout = "Axis", parameters = "normalize,normalizeMin=1,normalizeMax=-1,normalizeZero=0")]
+        [InputControl(name = "clutchAxis", displayName = "Clutch", layout = "Button", parameters = "normalize,normalizeMin=1,normalizeMax=-1,normalizeZero=0")]
         public short clutch;
 
-        public static FourCC Format => new('H', 'I', 'D');
+        public static FourCC Format => new('G', '2', '9');
 
         public FourCC format => Format;
+
+        public override string ToString()
+        {
+            var builder = new System.Text.StringBuilder();
+            builder.Append("{Data: ");
+            builder.Append($"Steering: {steering}, ");
+            builder.Append($"Throttle: {throttle}, ");
+            builder.Append($"Brake: {brake}, ");
+            builder.Append($"Clutch: {clutch}");
+            builder.Append("}");
+            return builder.ToString();
+        }
     }
 
     [Preserve]
     [InputControlLayout(displayName = "Logitech G29", stateType = typeof(LogitechG29State), 
         description = "Logitech G29 Racing Wheel with Force Feedback")]
 #if UNITY_EDITOR
-    [UnityEditor.InitializeOnLoad]
+    [InitializeOnLoad]
 #endif
     public sealed class LogitechG29 : InputDevice, IInputUpdateCallbackReceiver
     {
@@ -100,22 +114,20 @@ namespace Inputter
 #pragma warning disable IDE1006 // Naming Styles
         public static LogitechG29 current { get; private set; }
 
-        public static new IReadOnlyList<LogitechG29> all => s_AllMyDevices;
-#pragma warning disable IDE0044 // Add readonly modifier
-        private static List<LogitechG29> s_AllMyDevices = new();
-#pragma warning restore IDE0044 // Add readonly modifier
+        public static new System.Collections.Generic.IReadOnlyList<LogitechG29> all => s_AllMyDevices;
+        private static System.Collections.Generic.List<LogitechG29> s_AllMyDevices = new();
 
         #region Variables
 
-        public bool IsPlayingSpringForce { get; private set; }
-        public bool IsPlayingDamperForce { get; private set; }
-        public bool IsPlayingConstantForce { get; private set; }
-        public bool IsPlayingSurfaceEffect { get; private set; }
-        public bool IsPlayingSoftstopForce { get; private set; }
-        public bool IsPlayingDirtRoadEffect { get; private set; }
-        public bool IsPlayingBumpyRoadEffect { get; private set; }
-        public bool IsPlayingCarAirborne { get; private set; }
-        public bool IsPlayingSlippyRoadEffect { get; private set; }
+        public bool IsPlayingSpringForce => LogitechGSDK.LogiIsPlaying(Index, LogitechGSDK.LOGI_FORCE_SPRING);
+        public bool IsPlayingDamperForce => LogitechGSDK.LogiIsPlaying(Index, LogitechGSDK.LOGI_FORCE_DAMPER);
+        public bool IsPlayingConstantForce => LogitechGSDK.LogiIsPlaying(Index, LogitechGSDK.LOGI_FORCE_CONSTANT);
+        public bool IsPlayingSurfaceEffect => LogitechGSDK.LogiIsPlaying(Index, LogitechGSDK.LOGI_FORCE_SURFACE_EFFECT);
+        public bool IsPlayingSoftstopForce => LogitechGSDK.LogiIsPlaying(Index, LogitechGSDK.LOGI_FORCE_SOFTSTOP);
+        public bool IsPlayingDirtRoadEffect => LogitechGSDK.LogiIsPlaying(Index, LogitechGSDK.LOGI_FORCE_DIRT_ROAD);
+        public bool IsPlayingBumpyRoadEffect => LogitechGSDK.LogiIsPlaying(Index, LogitechGSDK.LOGI_FORCE_BUMPY_ROAD);
+        public bool IsPlayingCarAirborne => LogitechGSDK.LogiIsPlaying(Index, LogitechGSDK.LOGI_FORCE_CAR_AIRBORNE);
+        public bool IsPlayingSlippyRoadEffect => LogitechGSDK.LogiIsPlaying(Index, LogitechGSDK.LOGI_FORCE_SLIPPERY_ROAD);
 
         public int Index { get; } = 0;
         public bool IsConnected => LogitechGSDK.LogiIsDeviceConnected(Index, LogitechGSDK.LOGI_DEVICE_TYPE_WHEEL);
@@ -151,9 +163,9 @@ namespace Inputter
         public ButtonControl shifter7 { get; private set; }
 
         public AxisControl steering { get; private set; }
-        public AxisControl throttle { get; private set; }
-        public AxisControl brake { get; private set; }
-        public AxisControl clutch { get; private set; }
+        public ButtonControl throttle { get; private set; }
+        public ButtonControl brake { get; private set; }
+        public ButtonControl clutch { get; private set; }
         public ButtonControl triangleButton => northButton;
         public ButtonControl squareButton => westButton;
         public ButtonControl circleButton => eastButton;
@@ -163,7 +175,7 @@ namespace Inputter
 
         #endregion
 
-        public enum G29Button
+        public enum G29Button : byte
         {
             South = 0,
             West = 1,
@@ -248,6 +260,36 @@ namespace Inputter
 
         #region Force Feedback
 
+        public void StopAllForceFeedback()
+        {
+            if (IsPlayingConstantForce)
+                StopConstantForce();
+            
+            if (IsPlayingDamperForce)
+                StopDamperForce();
+
+            if (IsPlayingBumpyRoadEffect)
+                StopBumpyRoadEffect();
+
+            if (IsPlayingCarAirborne)
+               StopCarAirborne();
+
+            if (IsPlayingDirtRoadEffect)
+                StopDirtRoadEffect();
+
+            if (IsPlayingSlippyRoadEffect)
+                StopSlipperyRoadEffect();
+
+            if (IsPlayingSoftstopForce)
+                StopSoftstopForce();
+
+            if (IsPlayingSpringForce)
+                StopSpringForce();
+
+            if (IsPlayingSurfaceEffect)
+                StopSurfaceEffect();
+        }
+
         ///<summary>
         /// The dynamic spring force gets played on the X axis. 
         /// If a joystick is connected, all forces generated by the Steering Wheel SDK will be played on the X axis. 
@@ -268,7 +310,6 @@ namespace Inputter
             if (!IsConnected)
                 return false;
 
-            IsPlayingSpringForce = true;
             return LogitechGSDK.LogiPlaySpringForce(Index, offset, saturation, coefficient);
         }
 
@@ -281,7 +322,6 @@ namespace Inputter
             if (!IsConnected)
                 return false;
 
-            IsPlayingSpringForce = false;
             return LogitechGSDK.LogiStopSpringForce(Index);
         }
 
@@ -306,7 +346,6 @@ namespace Inputter
             if (!IsConnected)
                 return false;
 
-            IsPlayingConstantForce = true;
             return LogitechGSDK.LogiPlayConstantForce(Index, magnitude);
         }
 
@@ -319,7 +358,6 @@ namespace Inputter
             if (!IsConnected)
                 return false;
 
-            IsPlayingConstantForce = false;
             return LogitechGSDK.LogiStopConstantForce(Index);
         }
 
@@ -338,7 +376,6 @@ namespace Inputter
             if (!IsConnected)
                 return false;
 
-            IsPlayingDamperForce = true;
             return LogitechGSDK.LogiPlayDamperForce(Index, coefficient);
         }
 
@@ -351,7 +388,6 @@ namespace Inputter
             if (!IsConnected)
                 return false;
 
-            IsPlayingDamperForce = false;
             return LogitechGSDK.LogiStopDamperForce(Index);
         }
 
@@ -398,7 +434,6 @@ namespace Inputter
             if (!IsConnected)
                 return false;
 
-            IsPlayingDirtRoadEffect = true;
             return LogitechGSDK.LogiPlayDirtRoadEffect(Index, magnitude);
         }
 
@@ -411,7 +446,6 @@ namespace Inputter
             if (!IsConnected)
                 return false;
 
-            IsPlayingDirtRoadEffect = false;
             return LogitechGSDK.LogiStopDirtRoadEffect(Index);
         }
 
@@ -426,7 +460,6 @@ namespace Inputter
             if (!IsConnected)
                 return false;
 
-            IsPlayingBumpyRoadEffect = true;
             return LogitechGSDK.LogiPlayBumpyRoadEffect(Index, magnitude);
         }
 
@@ -439,7 +472,6 @@ namespace Inputter
             if (!IsConnected)
                 return false;
 
-            IsPlayingBumpyRoadEffect = false;
             return LogitechGSDK.LogiStopBumpyRoadEffect(Index);
         }
 
@@ -454,7 +486,6 @@ namespace Inputter
             if (!IsConnected)
                 return false;
 
-            IsPlayingSlippyRoadEffect = true;
             return LogitechGSDK.LogiPlaySideCollisionForce(Index, magnitude);
         }
 
@@ -467,7 +498,6 @@ namespace Inputter
             if (!IsConnected)
                 return false;
 
-            IsPlayingSlippyRoadEffect = false;
             return LogitechGSDK.LogiStopSlipperyRoadEffect(Index);
         }
 
@@ -495,7 +525,6 @@ namespace Inputter
             if (!IsConnected)
                 return false;
 
-            IsPlayingSurfaceEffect = true;
             return LogitechGSDK.LogiPlaySurfaceEffect(Index, (int)type, magnitude, period);
         }
 
@@ -508,7 +537,6 @@ namespace Inputter
             if (!IsConnected)
                 return false;
 
-            IsPlayingSurfaceEffect = false;
             return LogitechGSDK.LogiStopSurfaceEffect(Index);
         }
 
@@ -517,7 +545,6 @@ namespace Inputter
             if (!IsConnected)
                 return false;
 
-            IsPlayingCarAirborne = true;
             return LogitechGSDK.LogiPlayCarAirborne(Index);
         }
 
@@ -530,7 +557,6 @@ namespace Inputter
             if (!IsConnected)
                 return false;
 
-            IsPlayingCarAirborne = false;
             return LogitechGSDK.LogiStopCarAirborne(Index);
         }
 
@@ -543,7 +569,6 @@ namespace Inputter
             if (!IsConnected)
                 return false;
 
-            IsPlayingSoftstopForce = true;
             return LogitechGSDK.LogiPlaySoftstopForce(Index, usableRange);
         }
 
@@ -556,7 +581,6 @@ namespace Inputter
             if (!IsConnected)
                 return false;
 
-            IsPlayingSoftstopForce = false;
             return LogitechGSDK.LogiStopSoftstopForce(Index);
         }
 
@@ -564,31 +588,31 @@ namespace Inputter
 
         #region Methods
 
-        /// <summary>
-        /// Set current Logitech Controller's settings
-        /// </summary>
-        /// <param name="propertiesData"></param>
-        /// <returns></returns>
-        public bool SetControllerProperties(LogitechGSDK.LogiControllerPropertiesData propertiesData)
-        {
-            if (!IsConnected)
-                return false;
+        ///// <summary>
+        ///// Set current Logitech Controller's settings
+        ///// </summary>
+        ///// <param name="propertiesData"></param>
+        ///// <returns></returns>
+        //public bool SetControllerProperties(LogitechGSDK.LogiControllerPropertiesData propertiesData)
+        //{
+        //    if (!IsConnected)
+        //        return false;
 
-            return LogitechGSDK.LogiSetPreferredControllerProperties(propertiesData);
-        }
+        //    return LogitechGSDK.LogiSetPreferredControllerProperties(propertiesData);
+        //}
 
-        /// <summary>
-        /// Get current Logitech Controller's settings
-        /// </summary>
-        /// <param name="propertiesData"></param>
-        /// <returns></returns>
-        public bool GetControllerProperties(ref LogitechGSDK.LogiControllerPropertiesData propertiesData)
-        {
-            if (!IsConnected)
-                return false;
+        ///// <summary>
+        ///// Get current Logitech Controller's settings
+        ///// </summary>
+        ///// <param name="propertiesData"></param>
+        ///// <returns></returns>
+        //public bool GetControllerProperties(ref LogitechGSDK.LogiControllerPropertiesData propertiesData)
+        //{
+        //    if (!IsConnected)
+        //        return false;
 
-            return LogitechGSDK.LogiGetCurrentControllerProperties(Index, ref propertiesData);
-        }
+        //    return LogitechGSDK.LogiGetCurrentControllerProperties(Index, ref propertiesData);
+        //}
 
         public enum ShiftType
         {
@@ -618,7 +642,7 @@ namespace Inputter
             if (!IsConnected)
                 return string.Empty;
 
-            var deviceName = new StringBuilder(256);
+            var deviceName = new System.Text.StringBuilder(256);
             LogitechGSDK.LogiGetFriendlyProductName(Index, deviceName, 256);
             return deviceName.ToString();
         }
@@ -665,6 +689,20 @@ namespace Inputter
 
         #endregion
 
+#if UNITY_EDITOR
+
+        private const string DEBUG_PATH = "Tools/Inputter/Enable Debug Mode";
+        private static bool debugMode = false;
+
+        [MenuItem(DEBUG_PATH)]
+        private static void EnableDebugMode()
+        {
+            debugMode = !debugMode;
+            Menu.SetChecked(DEBUG_PATH, debugMode);
+        }
+
+#endif
+
         private const bool IGNORE_XINPUT_CONTROLLERS = false;
 
         public override void MakeCurrent()
@@ -682,17 +720,19 @@ namespace Inputter
         protected override void OnRemoved()
         {
             base.OnRemoved();
+
+            if (current == this)
+                current = null;
+
             s_AllMyDevices.Remove(this);
         }
 
         protected override void FinishSetup()
         {
-            base.FinishSetup();
-
             steering = GetChildControl<AxisControl>("steerAxis");
-            throttle = GetChildControl<AxisControl>("throttleAxis");
-            brake = GetChildControl<AxisControl>("brakeAxis");
-            clutch = GetChildControl<AxisControl>("clutchAxis");
+            throttle = GetChildControl<ButtonControl>("throttleAxis");
+            brake = GetChildControl<ButtonControl>("brakeAxis");
+            clutch = GetChildControl<ButtonControl>("clutchAxis");
 
             northButton = GetChildControl<ButtonControl>("northButton");
             southButton = GetChildControl<ButtonControl>("southButton");
@@ -722,9 +762,17 @@ namespace Inputter
             shifter5 = GetChildControl<ButtonControl>("shifter5");
             shifter6 = GetChildControl<ButtonControl>("shifter6");
             shifter7 = GetChildControl<ButtonControl>("shifter7");
+
+            base.FinishSetup();
         }
 
-        private static void RegisterLayout()
+
+#if UNITY_EDITOR
+        static LogitechG29() => Init();
+#endif
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void Init()
         {
             InputSystem.RegisterLayout<LogitechG29>
             (
@@ -733,36 +781,42 @@ namespace Inputter
                     .WithInterface("HID")
                     .WithManufacturer("Logitech")
                     .WithProduct("G29 Driving Force Racing Wheel")
-                    .WithVersion("35072")
                     .WithCapability("vendorId", 0x46D)
                     .WithCapability("productId", 0xC24F)
-                    .WithCapability("usage", 4)
-                    //.WithCapability("usagePage", 1)
+                    .WithCapability("usagePage", 1)
+                    //.WithCapability("usage", 4)
+                    //.WithVersion("35072")
                     //.WithCapability("usagePage", "GenericDesktop")
             );
-        }
 
-        static LogitechG29() => RegisterLayout();
+            if (!Application.isPlaying)
+                return;
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-#pragma warning disable IDE0051 // Remove unused private members
-        private static void Init()
-#pragma warning restore IDE0051 // Remove unused private members
-        {
-            RegisterLayout();
-            Debug.Log("Logitech G29 has been initialized");
+            var init = LogitechGSDK.LogiSteeringInitialize(IGNORE_XINPUT_CONTROLLERS);
+            Application.quitting += OnQuit;
 
-            LogitechGSDK.LogiSteeringInitialize(IGNORE_XINPUT_CONTROLLERS);
-            Application.quitting += Quit;
+#if UNITY_EDITOR
+            if (debugMode)
+                Debug.Log($"Logitech G29 {(init ? "has" : "has not")} been initialized");
+#endif
+
             OnInitialized?.Invoke();
         }
 
-        private static void Quit()
+        private static void OnQuit()
         {
-            Debug.Log("Logitech G29 has been shutdown");
+            Application.quitting -= OnQuit;
 
-            Application.quitting -= Quit;
+            if (LogitechG29.current != null)
+                LogitechG29.current.StopAllForceFeedback();
+
             LogitechGSDK.LogiSteeringShutdown();
+
+#if UNITY_EDITOR
+            if (debugMode)
+                Debug.Log("Logitech G29 has been shutdown");
+#endif
+
             OnShutdown?.Invoke();
         }
 
@@ -776,7 +830,7 @@ namespace Inputter
             var state = new LogitechG29State();
             var logiState = LogitechGSDK.LogiGetStateCSharp(Index);
 
-            foreach (G29Button key in Enum.GetValues(typeof(G29Button)))
+            foreach (G29Button key in System.Enum.GetValues(typeof(G29Button)))
                 HandleInput(ref state, key);
 
             const uint DPAD_UP = 0u;
@@ -834,108 +888,113 @@ namespace Inputter
 
             InputSystem.QueueStateEvent(this, state);
 
+            //InputState.Change(steering, logiState.lX);
+            //InputState.Change(throttle, logiState.lY);
+            //InputState.Change(brake, logiState.lRz);
+            //InputState.Change(clutch, logiState.rglSlider[0]);
+
             void HandleInput(ref LogitechG29State state, G29Button button)
             {
                 switch (button)
                 {
                     case G29Button.North:
-                        state.buttons = SetBit(state.buttons, 4, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
+                        state.buttons = SetBit(state.buttons, position: 4, LogitechGSDK.LogiButtonReleased(Index, (int)button));
                         break;
 
                     case G29Button.West:
-                        state.buttons = SetBit(state.buttons, 7, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
+                        state.buttons = SetBit(state.buttons, position: 7, LogitechGSDK.LogiButtonReleased(Index, (int)button));
                         break;
 
                     case G29Button.East:
-                        state.buttons = SetBit(state.buttons, 5, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
+                        state.buttons = SetBit(state.buttons, position: 5, LogitechGSDK.LogiButtonReleased(Index, (int)button));
                         break;
 
                     case G29Button.South:
-                        state.buttons = SetBit(state.buttons, 6, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
+                        state.buttons = SetBit(state.buttons, position: 6, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
                         break;
 
                     case G29Button.LeftBumper:
-                        state.buttons = SetBit(state.buttons, 10, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
+                        state.buttons = SetBit(state.buttons, position: 10, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
                         break;
 
                     case G29Button.RightBumper:
-                        state.buttons = SetBit(state.buttons, 11, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
+                        state.buttons = SetBit(state.buttons, position: 11, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
                         break;
 
                     case G29Button.LeftTrigger:
-                        state.buttons = SetBit(state.buttons, 12, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
+                        state.buttons = SetBit(state.buttons, position: 12, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
                         break;
 
                     case G29Button.RightTrigger:
-                        state.buttons = SetBit(state.buttons, 13, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
+                        state.buttons = SetBit(state.buttons, position: 13, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
                         break;
 
                     case G29Button.LeftStick:
-                        state.buttons = SetBit(state.buttons, 8, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
+                        state.buttons = SetBit(state.buttons, position: 8, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
                         break;
 
                     case G29Button.RightStick:
-                        state.buttons = SetBit(state.buttons, 9, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
+                        state.buttons = SetBit(state.buttons, position: 9, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
                         break;
 
                     case G29Button.LeftSpin:
-                        state.buttons = SetBit(state.buttons, 19, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
+                        state.buttons = SetBit(state.buttons, position: 19, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
                         break;
 
                     case G29Button.RightSpin:
-                        state.buttons = SetBit(state.buttons, 20, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
+                        state.buttons = SetBit(state.buttons, position: 20, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
                         break;
 
                     case G29Button.EnterSpin:
-                        state.buttons = SetBit(state.buttons, 21, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
+                        state.buttons = SetBit(state.buttons, position: 21, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
                         break;
 
                     case G29Button.Plus:
-                        state.buttons = SetBit(state.buttons, 17, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
+                        state.buttons = SetBit(state.buttons, position: 17, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
                         break;
 
                     case G29Button.Minus:
-                        state.buttons = SetBit(state.buttons, 18, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
+                        state.buttons = SetBit(state.buttons, position: 18, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
                         break;
 
                     case G29Button.Share:
-                        state.buttons = SetBit(state.buttons, 14, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
+                        state.buttons = SetBit(state.buttons, position: 14, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
                         break;
 
                     case G29Button.Options:
-                        state.buttons = SetBit(state.buttons, 15, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
+                        state.buttons = SetBit(state.buttons, position: 15, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
                         break;
 
                     case G29Button.Home:
-                        state.buttons = SetBit(state.buttons, 16, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
+                        state.buttons = SetBit(state.buttons, position: 16, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
                         break;
 
                     case G29Button.Shifter1:
-                        state.shifter = SetBit(state.shifter, 0, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
+                        state.shifter = SetBit(state.shifter, position: 0, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
                         break;
 
                     case G29Button.Shifter2:
-                        state.shifter = SetBit(state.shifter, 1, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
+                        state.shifter = SetBit(state.shifter, position: 1, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
                         break;
 
                     case G29Button.Shifter3:
-                        state.shifter = SetBit(state.shifter, 2, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
+                        state.shifter = SetBit(state.shifter, position: 2, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
                         break;
 
                     case G29Button.Shifter4:
-                        state.shifter = SetBit(state.shifter, 3, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
+                        state.shifter = SetBit(state.shifter, position: 3, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
                         break;
 
                     case G29Button.Shifter5:
-                        state.shifter = SetBit(state.shifter, 4, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
+                        state.shifter = SetBit(state.shifter, position: 4, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
                         break;
 
                     case G29Button.Shifter6:
-                        state.shifter = SetBit(state.shifter, 5, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
+                        state.shifter = SetBit(state.shifter, position: 5, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
                         break;
 
                     case G29Button.Shifter7:
-                        state.shifter = SetBit(state.shifter, 6, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
+                        state.shifter = SetBit(state.shifter, position: 6, LogitechGSDK.LogiButtonIsPressed(Index, (int)button));
                         break;
                 }
             }

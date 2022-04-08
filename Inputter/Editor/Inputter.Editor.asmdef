@@ -1,0 +1,19 @@
+{
+    "name": "Inputter.Runtime.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:4cb071ee81692854ab0e0c65eb9ba25e",
+        "GUID:75469ad4d38634e559750d17036d5f7c"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
