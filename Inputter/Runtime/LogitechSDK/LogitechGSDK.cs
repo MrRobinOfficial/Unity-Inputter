@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Specialized;
-using System.Runtime.InteropServices;
-using System.Diagnostics;
-using System.Text;
+﻿using System.Runtime.InteropServices;
 
 public class LogitechGSDK
 {
@@ -11,7 +6,6 @@ public class LogitechGSDK
     public const int LOGI_MAX_CONTROLLERS = 4;
 
     //Force types
-
     public const int LOGI_FORCE_NONE = -1;
     public const int LOGI_FORCE_SPRING = 0;
     public const int LOGI_FORCE_CONSTANT = 1;
@@ -26,17 +20,13 @@ public class LogitechGSDK
     public const int LOGI_FORCE_SOFTSTOP = 10;
     public const int LOGI_FORCE_CAR_AIRBORNE = 11;
 
-
     //Periodic types  for surface effect
-
     public const int LOGI_PERIODICTYPE_NONE = -1;
     public const int LOGI_PERIODICTYPE_SINE = 0;
     public const int LOGI_PERIODICTYPE_SQUARE = 1;
     public const int LOGI_PERIODICTYPE_TRIANGLE = 2;
 
-
     //Devices types
-
     public const int LOGI_DEVICE_TYPE_NONE = -1;
     public const int LOGI_DEVICE_TYPE_WHEEL = 0;
     public const int LOGI_DEVICE_TYPE_JOYSTICK = 1;
@@ -44,17 +34,13 @@ public class LogitechGSDK
     public const int LOGI_DEVICE_TYPE_OTHER = 3;
     public const int LOGI_NUMBER_DEVICE_TYPES = 4;
 
-
     //Manufacturer types
-
     public const int LOGI_MANUFACTURER_NONE = -1;
     public const int LOGI_MANUFACTURER_LOGITECH = 0;
     public const int LOGI_MANUFACTURER_MICROSOFT = 1;
     public const int LOGI_MANUFACTURER_OTHER = 2;
 
-
     //Model types
-
     public const int LOGI_MODEL_G27 = 0;
     public const int LOGI_MODEL_DRIVING_FORCE_GT = 1;
     public const int LOGI_MODEL_G25 = 2;
@@ -101,7 +87,7 @@ public class LogitechGSDK
 
         public override string ToString()
         {
-            var builder = new StringBuilder();
+            var builder = new System.Text.StringBuilder();
             builder.AppendLine($"Properties Data");
             builder.AppendLine($"Force Enable: {forceEnable}");
             builder.AppendLine($"Overall Gain: {overallGain}%");
@@ -116,7 +102,6 @@ public class LogitechGSDK
             return builder.ToString();
         }
     }
-
 
     [StructLayout(LayoutKind.Sequential, Pack = 2)]
     public struct DIJOYSTATE2ENGINES
@@ -166,7 +151,7 @@ public class LogitechGSDK
     public static extern bool LogiUpdate();
 
     [DllImport("LogitechSteeringWheelEnginesWrapper", CallingConvention = CallingConvention.Cdecl)]
-    public static extern IntPtr LogiGetStateENGINES(int index);
+    public static extern System.IntPtr LogiGetStateENGINES(int index);
 
     public static DIJOYSTATE2ENGINES LogiGetStateCSharp(int index)
     {
@@ -193,10 +178,10 @@ public class LogitechGSDK
     }
 
     [DllImport("LogitechSteeringWheelEnginesWrapper", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-    public static extern bool LogiGetDevicePath(int index, StringBuilder str, int size);
+    public static extern bool LogiGetDevicePath(int index, System.Text.StringBuilder str, int size);
 
     [DllImport("LogitechSteeringWheelEnginesWrapper", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-    public static extern bool LogiGetFriendlyProductName(int index, StringBuilder str, int size);
+    public static extern bool LogiGetFriendlyProductName(int index, System.Text.StringBuilder str, int size);
 
     [DllImport("LogitechSteeringWheelEnginesWrapper", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
     public static extern bool LogiIsConnected(int index);

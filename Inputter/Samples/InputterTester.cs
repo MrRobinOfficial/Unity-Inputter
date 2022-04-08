@@ -35,6 +35,8 @@ namespace Inputter.Samples
     }
 #endif
 
+    [AddComponentMenu("Inputter/Samples/Inputter Tester"), DisallowMultipleComponent]
+    [RequireComponent(typeof(PlayerInput))]
     public class InputterTester : MonoBehaviour
     {
         public float Steering { get; private set; }
@@ -79,7 +81,7 @@ namespace Inputter.Samples
                 LogitechG29.current[LogitechG29.G29Button.RightBumper].wasReleasedThisFrame)
                 Debug.Log("Button!");
 
-            Dpad = LogitechG29.current.dpad.ReadValue();
+            //Dpad = LogitechG29.current.dpad.ReadValue();
         }
     } 
 }

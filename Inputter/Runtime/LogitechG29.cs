@@ -6,7 +6,6 @@ using UnityEngine.InputSystem;
 using UnityEngine.Scripting;
 using UnityEngine.Events;
 using UnityEngine;
-using System.Threading.Tasks;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -83,7 +82,7 @@ namespace Inputter
         [InputControl(name = "clutchAxis", displayName = "Clutch", layout = "Button", parameters = "normalize,normalizeMin=1,normalizeMax=-1,normalizeZero=0")]
         public short clutch;
 
-        public static FourCC Format => new('G', '2', '9');
+        public static FourCC Format => new('H', 'I', 'D');
 
         public FourCC format => Format;
 
@@ -692,13 +691,13 @@ namespace Inputter
 #if UNITY_EDITOR
 
         private const string DEBUG_PATH = "Tools/Inputter/Enable Debug Mode";
-        private static bool debugMode = false;
 
         [MenuItem(DEBUG_PATH)]
         private static void EnableDebugMode()
         {
-            debugMode = !debugMode;
-            Menu.SetChecked(DEBUG_PATH, debugMode);
+            var value = !EditorPrefs.GetBool(DEBUG_PATH);
+            EditorPrefs.SetBool(DEBUG_PATH, value);
+            Menu.SetChecked(DEBUG_PATH, value);
         }
 
 #endif
@@ -796,7 +795,7 @@ namespace Inputter
             Application.quitting += OnQuit;
 
 #if UNITY_EDITOR
-            if (debugMode)
+            if (EditorPrefs.GetBool(DEBUG_PATH))
                 Debug.Log($"Logitech G29 {(init ? "has" : "has not")} been initialized");
 #endif
 
@@ -813,7 +812,7 @@ namespace Inputter
             LogitechGSDK.LogiSteeringShutdown();
 
 #if UNITY_EDITOR
-            if (debugMode)
+            if (EditorPrefs.GetBool(DEBUG_PATH))
                 Debug.Log("Logitech G29 has been shutdown");
 #endif
 
