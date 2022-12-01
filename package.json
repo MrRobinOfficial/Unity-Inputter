@@ -1,0 +1,18 @@
+{
+  "name": "com.mrrobinofficial.inputter",
+  "version": "2.2.3",
+  "displayName": "Inputter",
+  "description": "Extension of Unity Logitech G29 SDK & extra stuff for Unity Input System",
+  "unity": "2019.4",
+  "keywords": [
+    "Inputter",
+    "Logitech SDK",
+    "Input System",
+    "Extension"
+  ],
+  "author": {
+    "name": "MrRobinOfficial",
+    "email": "mrrobin123mail@gmail.com",
+    "url": "https://github.com/MrRobinOfficial"
+  }
+}
