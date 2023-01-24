@@ -16,7 +16,7 @@
 ## Introduction
 
 Inputter is a extensions of new input system for Unity with combination of Logitech G SDK. Inputter has a new input device called "LogitechG29" with all force feedback and all buttons/axis. 
-This parsing system was built using [Logitech G SDK](https://www.logitechg.com/en-us/innovation/developer-lab.html).
+This "new" input device was built by using [Logitech G SDK](https://www.logitechg.com/en-us/innovation/developer-lab.html).
 
 ## Installation
 
