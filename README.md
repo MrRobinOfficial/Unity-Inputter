@@ -10,6 +10,7 @@
 <div align="center">
   
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/mrrobinofficial/unity-inputter/blob/HEAD/LICENSE.txt)
+![maintenance-status](https://img.shields.io/badge/maintenance-passively--maintained-yellowgreen.svg)
 
 </div>
 
