@@ -1,5 +1,5 @@
 {
-    "name": "NewVehicleControls",
+    "name": "uInputter_VehicleControls",
     "maps": [
         {
             "name": "Car",
@@ -102,7 +102,7 @@
                 {
                     "name": "",
                     "id": "a2bcc43a-dd16-4c1d-a7d1-3c5f5d37fd2d",
-                    "path": "<Racing Wheel>/brakeAxis",
+                    "path": "<Logitech G29 Racing Wheel>/brakeAxis",
                     "interactions": "",
                     "processors": "",
                     "groups": "Joystick",
@@ -124,7 +124,7 @@
                 {
                     "name": "",
                     "id": "3abd3d78-8d94-4a94-8ff5-b22c20e8f88c",
-                    "path": "<Logitech G29>/South Button",
+                    "path": "<Logitech G29 Racing Wheel>/southButton",
                     "interactions": "",
                     "processors": "",
                     "groups": "Joystick",
@@ -146,7 +146,7 @@
                 {
                     "name": "",
                     "id": "821beae4-c444-4b52-9461-9ab39da9220d",
-                    "path": "<Racing Wheel>/rightShiftButton",
+                    "path": "<Logitech G29 Racing Wheel>/rightShiftButton",
                     "interactions": "",
                     "processors": "",
                     "groups": "Joystick",
@@ -168,7 +168,7 @@
                 {
                     "name": "",
                     "id": "c7364a20-5c89-4e8a-b6b4-13a596ee3369",
-                    "path": "<Racing Wheel>/leftShiftButton",
+                    "path": "<Logitech G29 Racing Wheel>/leftShiftButton",
                     "interactions": "",
                     "processors": "",
                     "groups": "Joystick",
@@ -179,7 +179,7 @@
                 {
                     "name": "",
                     "id": "e02fb2ba-a6f9-49f4-a1e1-ab977ac70294",
-                    "path": "<Racing Wheel>/stick/x",
+                    "path": "<Logitech G29 Racing Wheel>/stick/x",
                     "interactions": "",
                     "processors": "",
                     "groups": "Joystick",
@@ -223,7 +223,7 @@
                 {
                     "name": "",
                     "id": "d82268f6-ea0a-4b52-9efc-d979314cb6ce",
-                    "path": "<Racing Wheel>/clutchAxis",
+                    "path": "<Logitech G29 Racing Wheel>/clutchAxis",
                     "interactions": "",
                     "processors": "",
                     "groups": "Joystick",
@@ -256,7 +256,7 @@
                 {
                     "name": "",
                     "id": "48d4ecbc-c328-4610-87fa-bf619cfd4223",
-                    "path": "<Racing Wheel>/returnButton",
+                    "path": "<Logitech G29 Racing Wheel>/returnButton",
                     "interactions": "",
                     "processors": "",
                     "groups": "Joystick",
@@ -267,7 +267,7 @@
                 {
                     "name": "",
                     "id": "14bbbf46-8844-438b-9ccd-763cf52f3b84",
-                    "path": "<Racing Wheel>/optionsButton",
+                    "path": "<Logitech G29 Racing Wheel>/optionsButton",
                     "interactions": "",
                     "processors": "",
                     "groups": "Joystick",
@@ -289,7 +289,7 @@
                 {
                     "name": "",
                     "id": "2932d752-5bff-483d-a3aa-c77591eeb1ad",
-                    "path": "<Racing Wheel>/throttleAxis",
+                    "path": "<Logitech G29 Racing Wheel>/throttleAxis",
                     "interactions": "",
                     "processors": "",
                     "groups": "Joystick",
@@ -333,8 +333,8 @@
             "bindingGroup": "Joystick",
             "devices": [
                 {
-                    "devicePath": "<Racing Wheel>",
-                    "isOptional": false,
+                    "devicePath": "<Logitech G29 Racing Wheel>",
+                    "isOptional": true,
                     "isOR": false
                 }
             ]

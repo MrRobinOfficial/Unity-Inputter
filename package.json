@@ -1,8 +1,8 @@
 {
-  "name": "com.mrrobinofficial.inputter",
+  "name": "com.mrrobin.inputter",
   "version": "2.2.3",
   "displayName": "Inputter",
-  "description": "Extension of Unity Logitech G29 SDK & extra stuff for Unity Input System",
+  "description": "Extension tool for the Unity Input System that adds support for the Logitech G29 steering wheel and provides additional functionality for handling input. This tool is designed to enhance the Unity Input System with new features and capabilities, making it easier to work with input devices and manage user interactions in your games and applications.",
   "unity": "2019.4",
   "keywords": [
     "Inputter",

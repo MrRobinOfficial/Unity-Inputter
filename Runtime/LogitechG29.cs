@@ -7,7 +7,7 @@ using UnityEngine.Scripting;
 using UnityEngine.Events;
 using UnityEngine;
 using UnityEngine.InputSystem.Processors;
-using static LogitechGSDK;
+using System;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -19,7 +19,7 @@ namespace Inputter
     [InputControlLayout(
         displayName = "Logitech G29", 
         stateType = typeof(LogitechG29State),
-        description = "Logitech G29 Racing Wheel with Force Feedback", 
+        description = "Logitech G29 Racing Wheel with Force Feedback",
         stateFormat = "HID")]
 #if UNITY_EDITOR
     [InitializeOnLoad]
@@ -507,31 +507,33 @@ namespace Inputter
 
         #region Methods
 
-        ///// <summary>
-        ///// Set current Logitech Controller's settings
-        ///// </summary>
-        ///// <param name="propertiesData"></param>
-        ///// <returns></returns>
-        //public bool SetControllerProperties(LogitechGSDK.LogiControllerPropertiesData propertiesData)
-        //{
-        //    if (!IsConnected)
-        //        return false;
+        /// <summary>
+        /// Set current Logitech Controller's settings
+        /// </summary>
+        /// <param name="propertiesData"></param>
+        /// <returns></returns>
+        [Obsolete(".DLL does not support this method")]
+        public bool SetControllerProperties(LogitechGSDK.LogiControllerPropertiesData propertiesData)
+        {
+            if (!IsConnected)
+                return false;
 
-        //    return LogitechGSDK.LogiSetPreferredControllerProperties(propertiesData);
-        //}
+            return LogitechGSDK.LogiSetPreferredControllerProperties(propertiesData);
+        }
 
-        ///// <summary>
-        ///// Get current Logitech Controller's settings
-        ///// </summary>
-        ///// <param name="propertiesData"></param>
-        ///// <returns></returns>
-        //public bool GetControllerProperties(ref LogitechGSDK.LogiControllerPropertiesData propertiesData)
-        //{
-        //    if (!IsConnected)
-        //        return false;
+        /// <summary>
+        /// Get current Logitech Controller's settings
+        /// </summary>
+        /// <param name="propertiesData"></param>
+        /// <returns></returns>
+        [Obsolete(".DLL does not support this method")]
+        public bool GetControllerProperties(ref LogitechGSDK.LogiControllerPropertiesData propertiesData)
+        {
+            if (!IsConnected)
+                return false;
 
-        //    return LogitechGSDK.LogiGetCurrentControllerProperties(Index, ref propertiesData);
-        //}
+            return LogitechGSDK.LogiGetCurrentControllerProperties(Index, ref propertiesData);
+        }
 
         public enum ShiftType
         {
@@ -691,7 +693,7 @@ namespace Inputter
         {
             InputSystem.RegisterLayout<LogitechG29>
             (
-                name: "Racing Wheel",
+                name: "Logitech G29 Racing Wheel",
                 matches: new InputDeviceMatcher()
                     .WithInterface("HID")
                     .WithManufacturer("Logitech")
@@ -699,9 +701,9 @@ namespace Inputter
                     .WithCapability("vendorId", 0x46D)
                     .WithCapability("productId", 0xC24F)
                     .WithCapability("usagePage", 1)
-            //.WithCapability("usage", 4)
-            //.WithVersion("35072")
-            //.WithCapability("usagePage", "GenericDesktop")
+                    //.WithCapability("usage", 4)
+                    //.WithVersion("35072")
+                    //.WithCapability("usagePage", "GenericDesktop")
             );
 
             if (!Application.isPlaying)
@@ -714,7 +716,7 @@ namespace Inputter
             if (EditorPrefs.GetBool(DEBUG_PATH))
             {
                 if (init)
-                    Debug.Log($"Logitech G29 has been initialized!");
+                    Debug.Log("Logitech G29 has been initialized!");
                 else
                     Debug.LogError("Logitech G29 has not been initialized!");
             }
@@ -745,7 +747,9 @@ namespace Inputter
             if (!IsConnected)
                 return;
 
-            LogiUpdate();
+            // if the return value is false, means that the application has not been initialized
+            if (!LogitechGSDK.LogiUpdate())
+                return;
         }
     }
 

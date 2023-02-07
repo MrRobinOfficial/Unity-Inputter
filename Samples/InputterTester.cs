@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Assertions;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -8,9 +9,10 @@ using UnityEditor;
 namespace Inputter.Samples
 {
     [AddComponentMenu("Inputter/Samples/Inputter Tester"), DisallowMultipleComponent]
-    [RequireComponent(typeof(PlayerInput))]
     public class InputterTester : MonoBehaviour
     {
+        [SerializeField] private InputActionAsset m_InputActionAsset = null;
+
         public float Steering { get; private set; }
         public float Throttle { get; private set; }
         public float Brake { get; private set; }
@@ -23,16 +25,42 @@ namespace Inputter.Samples
         private PlayerInput input;
         private Vector3 angles;
 
-        private void Awake() => input = GetComponent<PlayerInput>();
+        private void Awake()
+        {
+            input = gameObject.AddComponent<PlayerInput>();
+            input.hideFlags = HideFlags.NotEditable;
+
+            input.actions = m_InputActionAsset;
+            input.actions.Enable();
+
+            hideFlags = HideFlags.NotEditable;
+        }
+
+        private void OnEnable() => input.ActivateInput();
+
+        private void OnDisable() => input.DeactivateInput();
+
+        private LogitechGSDK.LogiControllerPropertiesData data;
 
         private void Start()
         {
-            if (LogitechG29.current == null)
-                Debug.LogError($"{nameof(LogitechG29)} is null!");
+            Assert.IsNotNull(LogitechG29.current, "LogitechG29 is not supposed to be null!");
+
+            Debug.Log($"GetControllerProperties={LogitechG29.current.GetControllerProperties(ref data)}");
+            print($"GETTER\n{data}");
+
+            data.wheelRange = 0;
+            data.forceEnable = false;
+            Debug.Log($"SetControllerProperties={LogitechG29.current.SetControllerProperties(data)}");
+
+            Debug.Log($"GetControllerProperties={LogitechG29.current.GetControllerProperties(ref data)}");
+            print($"SETTER\n{data}");
         }
 
         private void Update()
         {
+            Assert.IsNotNull(LogitechG29.current, "LogitechG29 is not supposed to be null!");
+
             if (LogitechG29.current == null)
                 return;
 
